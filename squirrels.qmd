@@ -1,1 +1,41 @@
 
+
+```{r}
+library(readr)
+
+squirrels <- read.csv("data/squirrel_data.csv", na.strings = c("", "NA"))
+squirrels
+```
+```{r}
+names(squirrels)
+```
+```{r}
+library(dplyr)
+library(tibble)
+library(tidyr)
+
+missing_squirrels <- data.frame(
+  missing_count = sapply(squirrels, function(x) sum(is.na(x)))
+)
+
+missing_squirrels$missing_percentage <- missing_squirrels$missing_count / nrow(squirrels) * 100
+missing_squirrels
+```
+Columns 'Color.notes', 'Specific.Location', 'Other.Activities' and 'Other.Interactions' have 84-94% of values missing!
+
+```{r}
+library(ggplot2)
+
+ggplot(squirrels, aes(x = Shift, fill = Shift)) +
+  geom_bar() +
+  labs(title = "Squirrel shifts") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+```
+```{r}
+ggplot(squirrels, aes(x = Primary.Fur.Color, fill = Primary.Fur.Color)) +
+  geom_bar(alpha = 0.8) +
+  labs(title = "Squirrel shifts") +
+  scale_fill_manual(values = c("black", "sienna", "darkgray", "yellow")) +
+  theme_minimal()
+```
