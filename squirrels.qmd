@@ -1,0 +1,218 @@
+
+
+```{r}
+library(readr)
+
+squirrels <- read.csv("data/squirrel_data.csv", na.strings = c("", "NA"))
+squirrels
+```
+```{r}
+names(squirrels)
+```
+```{r}
+library(dplyr)
+library(tibble)
+library(tidyr)
+
+missing_squirrels <- data.frame(
+  missing_count = sapply(squirrels, function(x) sum(is.na(x)))
+)
+
+missing_squirrels$missing_percentage <- missing_squirrels$missing_count / nrow(squirrels) * 100
+missing_squirrels
+```
+Columns 'Color.notes', 'Specific.Location', 'Other.Activities' and 'Other.Interactions' have 84-94% of values missing!
+
+```{r}
+squirrels$Primary.Fur.Color[is.na(squirrels$Primary.Fur.Color)] <- "Not Available"
+
+ggplot(squirrels, aes(x = Primary.Fur.Color, fill = Primary.Fur.Color)) +
+  geom_bar(alpha = 0.8) +
+  labs(title = "Count of different fur colors in Central Park squirrels",
+       x = NULL,
+       y = NULL) +
+  scale_fill_manual(name = NULL,
+                    values = c("black", "sienna", "darkgray", "yellow")) +
+  theme_minimal()
+```
+```{r}
+library(ggmap)
+
+borders <- c(bottom = 40.762, top = 40.8025, left = -73.99, right = -73.94)
+
+map <- get_stadiamap(borders, zoom = 14, maptype = "stamen_terrain")
+
+ggmap(map) +
+  geom_point(data = squirrels, aes(x = X, y = Y), size = 0.2) +
+  labs(title = "Squirrels in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal()
+```
+```{r}
+ggplot(squirrels, aes(x = X, y = Y)) +
+  geom_point(aes(colour = Shift), size = 0.5) +
+  scale_color_manual(values = c("AM" = "lightskyblue2", 
+                                "PM" = "dodgerblue4"),
+                     name = "Shift") +
+  labs(title = "Squirrel shifts in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal()
+```
+```{r}
+library(ggplot2)
+
+ggplot(squirrels, aes(x = X, y = Y)) +
+  geom_point(aes(colour = Shift), size = 1) +
+  scale_color_manual(values = c("AM" = "lightskyblue2", 
+                                "PM" = "dodgerblue4"),
+                     name = "Shift") +
+  labs(title = "Squirrel shifts in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal() +
+  coord_cartesian(xlim = c(NA, -73.97), ylim = c(NA, 40.78))
+```
+```{r}
+ggplot(squirrels, aes(x = X, y = Y)) +
+  geom_point(aes(colour = Shift), size = 1) +
+  scale_color_manual(values = c("AM" = "lightskyblue2", 
+                                "PM" = "dodgerblue4"),
+                     name = "Shift") +
+  labs(title = "Squirrel shifts in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal() +
+  coord_cartesian(xlim = c(NA, -73.97), ylim = c(NA, 40.78)) +
+  facet_wrap(~ Shift, ncol = 2)
+```
+```{r}
+ggplot(squirrels, aes(x = X, y = Y)) +
+  geom_point(aes(colour = Primary.Fur.Color), size = 0.5) +
+  scale_color_manual(values = c("Black" = "black", 
+                                "Cinnamon" = "sienna", 
+                                "Gray" = "darkgray", 
+                                "Not Available" = "yellow"),
+                     name = "Primary Fur Color") +
+  labs(title = "Squirrels in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal()
+```
+```{r}
+# Find the points with the lowest and highest X coordinates
+min_x_point <- squirrels[which.min(squirrels$X), c("X", "Y")]
+max_x_point <- squirrels[which.max(squirrels$X), c("X", "Y")]
+
+# Find the points with the lowest and highest Y coordinates
+min_y_point <- squirrels[which.min(squirrels$Y), c("X", "Y")]
+max_y_point <- squirrels[which.max(squirrels$Y), c("X", "Y")]
+
+outline_coords <- data.frame(
+  X = c(min_x_point$X, max_y_point$X, max_x_point$X, min_y_point$X),
+  Y = c(min_x_point$Y, max_y_point$Y, max_x_point$Y, min_y_point$Y)
+)
+```
+
+```{r}
+gray_squirrels <- subset(squirrels, Primary.Fur.Color == "Gray")
+
+ggplot(gray_squirrels, aes(x = X, y = Y)) +
+  geom_point(size = 0.5, color = "darkgray") +
+  geom_polygon(data = outline_coords, aes(x = X, y = Y), fill = NA, color = "red3", size = 0.5) +
+  labs(title = "Gray Squirrels in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal()
+```
+```{r}
+cinnamon_squirrels <- subset(squirrels, Primary.Fur.Color == "Cinnamon")
+
+ggplot(cinnamon_squirrels, aes(x = X, y = Y)) +
+  geom_point(size = 0.5, color = "sienna") +
+  geom_polygon(data = outline_coords, aes(x = X, y = Y), fill = NA, color = "red3", size = 0.5) +
+  labs(title = "Cinnamon Squirrels in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal()
+```
+```{r}
+black_squirrels <- subset(squirrels, Primary.Fur.Color == "Black")
+
+ggplot(black_squirrels, aes(x = X, y = Y)) +
+  geom_point(size = 0.5, color = "black") +
+  geom_polygon(data = outline_coords, aes(x = X, y = Y), fill = NA, color = "red3", size = 0.5) +
+  labs(title = "Black Squirrels in Central Park",
+       x = NULL,
+       y = NULL) +
+  theme_minimal()
+```
+```{r}
+squirrels$XX <- as.numeric(substr(squirrels$Hectare, 1, nchar(squirrels$Hectare) - 1))
+squirrels$Y <- substr(squirrels$Hectare, nchar(squirrels$Hectare), nchar(squirrels$Hectare))
+
+squirrels$Y <- factor(squirrels$Y, levels = rev(levels(factor(squirrels$Y))))
+
+squirrels_aggregated <- squirrels |> 
+  group_by(XX, Y) |> 
+  summarize(Squirrel_Count = sum(Hectare.Squirrel.Number), 
+            .groups = 'drop')
+
+max_count <- max(squirrels_aggregated$Squirrel_Count)
+breaks <- seq(0, max_count, length.out = 11)
+
+ggplot(squirrels_aggregated, 
+       aes(x = XX, 
+           y = Y)) +
+  geom_tile(aes(fill = Squirrel_Count), 
+            color = "white") +
+  scale_fill_viridis_c(option = "plasma", 
+                       breaks = breaks, 
+                       labels = round(breaks)) +
+  labs(title = "Squirrel occurrences per hectare",
+       x = NULL,
+       y = NULL,
+       fill = "Squirrel Count") +
+  theme_minimal() +
+  coord_fixed()
+
+```
+It looks like the squirrels enjoy The Ramble.
+
+```{r}
+squirrels_activities <- gather(squirrels, key = "Activity", value = "Value", Running:Foraging)
+
+squirrels_activities$Value <- as.logical(squirrels_activities$Value)
+
+ggplot(squirrels_activities, aes(x = Activity, 
+                           fill = factor(Value))) +
+  geom_bar(position = "fill", 
+           stat = "count") +
+  scale_fill_manual(values = c("TRUE" = "cadetblue2", "FALSE" = "lightpink")) +
+  labs(title = "Squirrel Activities",
+       y = NULL,
+       x = NULL,
+       fill = NULL) +
+  theme_minimal()
+```
+```{r}
+squirrels_vs_humans <- gather(squirrels, key = "Activity", value = "Value", Approaches:Runs.from)
+
+squirrels_vs_humans$Value <- as.logical(squirrels_vs_humans$Value)
+
+ggplot(squirrels_vs_humans, aes(x = Activity, 
+                           fill = factor(Value))) +
+  geom_bar(position = "fill", 
+           stat = "count") +
+  scale_fill_manual(values = c("TRUE" = "darkseagreen1", "FALSE" = "plum")) +
+  labs(title = "Squirrels vs Humans",
+       y = NULL,
+       x = NULL,
+       fill = NULL) +
+  theme_minimal()
+```
+```{r}
+
+```
+
