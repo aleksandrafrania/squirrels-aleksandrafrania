@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ## About the dataset
 
 - Data collected for the 2018 Squirrel Census project in NYC
-- 3'023 unique squirrel sightings
+- 3'023 unique squirrel sightings throughout October 2018
 - 31 columns including squirrel location, fur color, reaction to humans, etc.
 
 ```{r, out.width='95%', fig.align='center', echo = FALSE}
@@ -92,6 +92,19 @@ hectares
 
 ```
 
+## Different fur colors of the Central Park squirrels 
+
+```{r}
+squirrels$Primary.Fur.Color[is.na(squirrels$Primary.Fur.Color)] <- "Not Available"
+
+ggplot(squirrels, aes(x = Primary.Fur.Color, fill = Primary.Fur.Color)) +
+  geom_bar(alpha = 0.8) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_fill_manual(name = NULL,
+                    values = c("black", "sienna", "darkgray", "yellow")) +
+  theme_minimal()
+```
 
 
 
