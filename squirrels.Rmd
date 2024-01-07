@@ -35,7 +35,7 @@ pacman::p_load(ggmap, osmdata)
 register_stadiamaps("67db8286-2337-4988-b5a0-1a5e1adbeba4", write = FALSE)
 
 borders <- c(bottom = 40.762, top = 40.8025, left = -73.99, right = -73.94)
-map <- get_stadiamap(borders, zoom = 14, maptype = "stamen_terrain_background")
+map <- get_stadiamap(borders, zoom = 14, maptype = "stamen_terrain")
 
 ggmap(map) +
   geom_point(data = squirrels, 
@@ -122,8 +122,28 @@ ggplot(squirrels, aes(x = Primary.Fur.Color, fill = Primary.Fur.Color)) +
                     values = c("black", "sienna", "darkgray", "yellow")) +
   theme_minimal()
 ```
+## Suite
 
+```{r, echo = FALSE}
+map3 <- get_stadiamap(borders, zoom = 14, maptype = "stamen_toner_lines")
 
+ggmap(map3) +
+  geom_point(data = squirrels, 
+             aes(x = X, 
+                 y = Y, 
+                 colour = Primary.Fur.Color), 
+             size = 0.5) +
+  scale_color_manual(name = NULL,
+                    values = c("Black" = "black", 
+                               "Cinnamon" = "sienna", 
+                               "Gray" = "darkgray", 
+                               "Not Available" = "yellow")) +
+  labs(title = "Squirrel fur colors in Central Park", 
+       x = NULL, 
+       y = NULL) +
+  theme_minimal()
+
+```
 
 
 
