@@ -10,7 +10,6 @@ output:
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-#“default”, “bootstrap”, “cerulean”, “cosmo”, “darkly”, “flatly”, “journal”, “lumen”, “paper”, “readable”, “sandstone”, “simplex”, “spacelab”, “united”, “yeti”
 ```
 
 ## About the dataset
@@ -28,10 +27,15 @@ knitr::include_graphics("NYCSC.png")
 ## Sightings on a map
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE}
+library(pacman)
 library(ggmap)
 
+#Create a stadia terrain (osm) map
+pacman::p_load(ggmap, osmdata)
+register_stadiamaps("67db8286-2337-4988-b5a0-1a5e1adbeba4", write = FALSE)
+
 borders <- c(bottom = 40.762, top = 40.8025, left = -73.99, right = -73.94)
-map <- get_stadiamap(borders, zoom = 14, maptype = "stamen_terrain")
+map <- get_stadiamap(borders, zoom = 14, maptype = "stamen_terrain_background")
 
 ggmap(map) +
   geom_point(data = squirrels, 
@@ -42,7 +46,6 @@ ggmap(map) +
        y = NULL) +
   theme_minimal()
 ```
-
 ## Squirrel occurence per hectare
 
 ```{r cars, echo = TRUE, message = FALSE, warning = FALSE}
@@ -88,8 +91,22 @@ hectares
 
 ## Squirrel shifts
 
-```{r}
+```{r, echo = TRUE}
+map2 <- get_stadiamap(borders, zoom = 14, maptype = "stamen_terrain_lines")
 
+ggmap(map2) +
+  geom_point(data = squirrels, 
+             aes(x = X, 
+                 y = Y, 
+                 colour = Shift), 
+             size = 0.5) +
+  scale_color_manual(values = c("AM" = "lightskyblue2", 
+                                "PM" = "dodgerblue4"),
+                     name = NULL) +
+  labs(title = "Squirrel shifts in Central Park", 
+       x = NULL, 
+       y = NULL) +
+  theme_minimal()
 ```
 
 ## Different fur colors of the Central Park squirrels 
