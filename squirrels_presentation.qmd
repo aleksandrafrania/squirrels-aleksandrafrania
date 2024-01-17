@@ -1,0 +1,115 @@
+---
+title: "The Central Park Squirrel Census"
+author: "Aleksandra Frania | MADS"
+date: "`r Sys.Date()`"
+format: revealjs
+editor: visual
+smaller: true
+---
+
+## About the dataset
+
+-   Data collected for the 2018 Squirrel Census project in NYC
+
+-   3 023 unique squirrel sightings throughout October 2018
+
+-   31 columns including squirrel location, fur color, reaction to humans, etc.
+
+    ![](NYCSC.png)
+
+## All sightings on one map
+
+```{r}
+squirrels <- read.csv("data/squirrel_data.csv", na.strings = c("", "NA"))
+```
+
+```{r}
+library(pacman)
+library(ggmap)
+library(osmdata)
+library(ggspatial)
+
+#Create a stadia terrain (osm) map
+register_stadiamaps("67db8286-2337-4988-b5a0-1a5e1adbeba4", write = FALSE)
+
+borders <- c(bottom = 40.762, top = 40.8025, left = -74, right = -73.93)
+map <- get_stadiamap(borders, zoom = 15, maptype = "stamen_terrain")
+
+ggmap(map) +
+  geom_point(data = squirrels, 
+             aes(x = X, y = Y), 
+             size = 0.3) +
+  labs(title = "Squirrels sightings in Central Park, October 2018", 
+       x = "Longitude", 
+       y = "Latitude") +
+  annotation_north_arrow(location = "br", which_north = "true")
+```
+
+## Sightings during the first 3 weeks of October 2018
+
+```{r}
+squirrels$Date <- as.Date(as.character(squirrels$Date), format = "%m%d%Y")
+```
+
+```{r}
+# Split October 2018 into weeks
+week1 <- squirrels[squirrels$Date >= "2018-10-01" & squirrels$Date <= "2018-10-07", ]
+week2 <- squirrels[squirrels$Date >= "2018-10-08" & squirrels$Date <= "2018-10-14", ]
+week3 <- squirrels[squirrels$Date >= "2018-10-15" & squirrels$Date <= "2018-10-21", ]
+```
+
+```{r}
+library(gridExtra)
+
+# Define the date ranges
+date_ranges <- c("2018-10-01" , "2018-10-07", "2018-10-08", "2018-10-14",
+                  "2018-10-15" , "2018-10-21")
+
+# Create a 1x3 grid of maps for each date range
+new_borders <- c(bottom = 40.762, top = 40.8025, left = -73.99, right = -73.94)
+maps <- lapply(seq(1, length(date_ranges), by = 2), function(i) {
+  map <- get_stadiamap(new_borders, zoom = 14, maptype = "stamen_terrain")
+  
+  subset_data <- squirrels[squirrels$Date >= date_ranges[i] & squirrels$Date <= date_ranges[i+1], ]
+  
+  ggmap(map) +
+    geom_point(data = subset_data,
+               aes(x = X, y = Y), 
+               size = 0.1) +
+    labs(x = NULL,
+         y = NULL,
+         title = paste("Week", (i+1)/2), 
+         subtitle = paste("Sightings:", nrow(subset_data))) +
+    guides(subtitle = guide_legend(title.vjust = 0.5, 
+                                   title.theme = element_text(size = 10, face = "bold")))
+})
+
+# Combine maps into one big plot
+grid.arrange(grobs = maps, ncol = 3, widths = c(0.1, 0.1, 0.1))
+```
+
+## Week vs Weekend
+
+make 1 slide per week with 2 maps each, 1 week 1 weekend
+
+## Hectare sightings
+
+heatmap
+
+## AM vs PM
+
+maybe compare the weeks & weekends, will see
+
+## Fur colors bar plot
+
+plot
+
+## Fur colors all on 1 map
+
+plot
+
+## Fur colors on 3 separate maps
+
+maps
+
+## If time allows, some other results
