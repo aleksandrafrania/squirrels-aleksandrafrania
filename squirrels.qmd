@@ -11,12 +11,25 @@ names(squirrels)
 ```
 ```{r}
 library(dplyr)
-library(tibble)
 library(tidyr)
+library(stringr)
 
-missing_squirrels <- data.frame(
-  missing_count = sapply(squirrels, function(x) sum(is.na(x)))
-)
+# Setting the missing values in column Primary.Fur.Color to Not Available
+squirrels$Primary.Fur.Color[is.na(squirrels$Primary.Fur.Color)] <- "Not Available"
+
+# Since none of the data except coordinates and the date is numerical, it is difficult to make an interesting summarizing table. One can count the occurrence of unique values, but this can be just as well visualised in a bar plot, for instance.
+
+summary(squirrels$X)
+summary(squirrels$Y)
+summary(squirrels$Above.Ground.Sighter.Measurement)
+```
+
+```{r}
+library(tibble)
+
+# Checking how many missing values there are in each column of the dataset, by count and percentage
+
+missing_squirrels <- data.frame(missing_count = sapply(squirrels, function(x) sum(is.na(x))))
 
 missing_squirrels$missing_percentage <- missing_squirrels$missing_count / nrow(squirrels) * 100
 missing_squirrels
@@ -24,8 +37,7 @@ missing_squirrels
 Columns 'Color.notes', 'Specific.Location', 'Other.Activities' and 'Other.Interactions' have 84-94% of values missing!
 
 ```{r}
-squirrels$Primary.Fur.Color[is.na(squirrels$Primary.Fur.Color)] <- "Not Available"
-
+# Plotting the different fur colors counts of the Central Park squirrels
 ggplot(squirrels, aes(x = Primary.Fur.Color, fill = Primary.Fur.Color)) +
   geom_bar(alpha = 0.8) +
   labs(title = "Count of different fur colors in Central Park squirrels",

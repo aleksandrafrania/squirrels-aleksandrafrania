@@ -7,21 +7,36 @@ editor: visual
 smaller: true
 ---
 
-## About the dataset
+## About the data set
 
 -   Data collected for the 2018 Squirrel Census project in NYC
 
--   3 023 unique squirrel sightings throughout October 2018
+-   3,023 unique squirrel sightings throughout October 2018
 
 -   31 columns including squirrel location, fur color, reaction to humans, etc.
 
     ![](NYCSC.png)
 
-## All sightings on one map
+## About the data set
 
 ```{r}
 squirrels <- read.csv("data/squirrel_data.csv", na.strings = c("", "NA"))
 ```
+
+```{r}
+print("Summary for X")
+summary(squirrels$X)
+
+print("Summary for Y")
+summary(squirrels$Y)
+
+# To do: fix above.ground etc column to also make a summary of it
+
+print("Summary for Above.Gound.Sighter.Measurment")
+summary(squirrels$Above.Ground.Sighter.Measurement)
+```
+
+## All sightings on one map
 
 ```{r}
 library(pacman)
@@ -52,7 +67,7 @@ squirrels$Date <- as.Date(as.character(squirrels$Date), format = "%m%d%Y")
 ```
 
 ```{r}
-# Split October 2018 into weeks
+# Split October 2018 into weeks, only taking the 3 first ones (last sighting occurs on October 20th so plotting past that date is useless)
 week1 <- squirrels[squirrels$Date >= "2018-10-01" & squirrels$Date <= "2018-10-07", ]
 week2 <- squirrels[squirrels$Date >= "2018-10-08" & squirrels$Date <= "2018-10-14", ]
 week3 <- squirrels[squirrels$Date >= "2018-10-15" & squirrels$Date <= "2018-10-21", ]
@@ -113,3 +128,39 @@ plot
 maps
 
 ## If time allows, some other results
+
+## Squirrels vs Humans
+
+```{r, echo = FALSE}
+# echo doesn't work, need to find a way to remove this chunk from the slides
+
+library(dplyr)
+library(tidyr)
+
+squirrels |> 
+  summarise(Approaches_true = sum(Approaches == "true")*100/3023,
+            Approaches_false = sum(Approaches == "false")*100/3023,
+            Runs.from_true = sum(Runs.from == "true")*100/3023,
+            Runs.from_false = sum(Runs.from == "false")*100/3023,
+            Indifferent_true = sum(Indifferent == "true")*100/3023,
+            Indifferent_false = sum(Indifferent == "false")*100/3023) |> 
+  pivot_longer(cols = everything(),
+               names_to = c(".value", "Condition"),
+               names_sep = "_")
+```
+
+```{r}
+library(DiagrammeR)
+
+DiagrammeR("graph TB;
+    A(Squirrel meets Human)-->B(Squirrel approaches);
+    A-->C(Squirrel runs away);
+    A-->D(Squirrel is indifferent);
+    B-->E(Yes<br><br>5.89%);
+    B-->F(No<br><br>94.11%);
+    C-->G(Yes<br><br>22.43%);
+    C-->H(No<br><br>77.57%);
+    D-->I(Yes<br><br>48.10%);
+    D-->J(No<br><br>51.90%);")
+
+```
