@@ -229,7 +229,7 @@ map13 <- ggmap(new_map) +
                size = 0.1) +
     labs(x = NULL,
          y = NULL,
-         title = "Week 2", 
+         title = "Week 3", 
          subtitle = paste("Sightings:", nrow(weeknoend3)))
 
 # Weekends
@@ -257,7 +257,7 @@ map23 <- ggmap(new_map) +
                size = 0.1) +
     labs(x = NULL,
          y = NULL,
-         title = "Weekend 2", 
+         title = "Weekend 3", 
          subtitle = paste("Sightings:", nrow(weekend3)))
 
 ((map11 | map12 | map13) / (map21 | map22 | map23))
