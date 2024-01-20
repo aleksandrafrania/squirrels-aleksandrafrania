@@ -10,6 +10,11 @@ squirrels
 names(squirrels)
 ```
 ```{r}
+unique(squirrels$Date)
+```
+
+
+```{r}
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -17,12 +22,70 @@ library(stringr)
 # Setting the missing values in column Primary.Fur.Color to Not Available
 squirrels$Primary.Fur.Color[is.na(squirrels$Primary.Fur.Color)] <- "Not Available"
 
-# Since none of the data except coordinates and the date is numerical, it is difficult to make an interesting summarizing table. One can count the occurrence of unique values, but this can be just as well visualised in a bar plot, for instance.
+# Since none of the data except coordinates and the date is numerical, it is difficult to make an interesting summarizing table. One can count the occurrence of unique values, but this can be just as well visualized in a bar plot, for instance.
 
-summary(squirrels$X)
-summary(squirrels$Y)
-summary(squirrels$Above.Ground.Sighter.Measurement)
+# Replacing all FALSE values with 0 (FALSE means that squirrel was not seen above ground)
+squirrels$Above.Ground.Sighter.Measurement[squirrels$Above.Ground.Sighter.Measurement == FALSE] <- 0
+
+sum(squirrels$Above.Ground.Sighter.Measurement == 0, na.rm = TRUE)
+
+sum(is.na(squirrels$Above.Ground.Sighter.Measurement))
+
+# The most common value is 0 (most squirrels are seen on the ground) so we will replace all missing values with 0, since there are not that many NAs
+squirrels$Above.Ground.Sighter.Measurement[is.na(squirrels$Above.Ground.Sighter.Measurement)] <- 0
+
+sum(is.na(squirrels$Above.Ground.Sighter.Measurement))
+
+as.integer(squirrels$Above.Ground.Sighter.Measurement)
+typeof(squirrels$Above.Ground.Sighter.Measurement)
 ```
+```{r}
+ggplot(squirrels, aes(x = Above.Ground.Sighter.Measurement)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
+  ggtitle("Histogram of Non-zero Values") +
+  xlab("Sighter Position in meters (height)") +
+  ylab("Frequency")
+```
+```{r}
+squirrels$Date <- as.Date(as.character(squirrels$Date), format = "%m%d%Y")
+library(shiny)
+library(ggplot2)
+
+squirrels <- squirrels[order(squirrels$Date), ]
+unique_dates <- unique(squirrels$Date)
+
+start_date <- as.Date("2018-10-01")
+end_date <- as.Date("2018-10-31")
+
+ui <- fluidPage(
+  sliderInput("day", "Select Day", min = 1, max = length(unique_dates), value = 1, step = 1),
+  plotOutput("mapPlot")
+)
+
+server <- function(input, output, session) {
+  output$mapPlot <- renderPlot({
+    # Create a map for the selected day
+    map <- get_stadiamap(borders, zoom = 14, maptype = "stamen_terrain")
+    
+    subset_data <- squirrels[squirrels$Date == unique_dates[input$day], ]
+    
+    ggmap(map) +
+      geom_point(data = subset_data,
+                 aes(x = X, y = Y), 
+                 size = 0.1) +
+      labs(x = NULL,
+           y = NULL,
+           title = paste("Date:", format(subset_data$Date, "%Y-%m-%d")), 
+           subtitle = paste("Sightings:", nrow(subset_data))) +
+      guides(subtitle = guide_legend(title.vjust = 0.5, 
+                                     title.theme = element_text(size = 10, face = "bold")))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
 
 ```{r}
 library(tibble)
