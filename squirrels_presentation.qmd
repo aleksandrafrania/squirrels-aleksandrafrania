@@ -181,7 +181,7 @@ map3 <- ggmap(new_map) +
                size = 0.1) +
     labs(x = NULL,
          y = NULL,
-         title = "Week 2", 
+         title = "Week 3", 
          subtitle = paste("Sightings:", nrow(week3)))
 
 library(patchwork)
